@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { AppNav } from "@/components/app-nav";
+import { AppShell } from "@/components/layout/app-shell";
+import { Button, Card, Input } from "@/components/ui/primitives";
 import type { Message } from "@/lib/types";
 
 export default function ChatPage() {
@@ -68,39 +69,55 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50">
-      <AppNav />
-      <main className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-4 py-6">
-        <div className="rounded-lg border border-zinc-200 bg-white p-3">
-          <input
-            placeholder="Search messages..."
-            className="w-full rounded border border-zinc-300 px-3 py-2"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-        </div>
-        <section className="h-[60vh] space-y-3 overflow-y-auto rounded-lg border border-zinc-200 bg-white p-4">
-          {filtered.map((message) => (
-            <article key={message.id} className="rounded-lg bg-zinc-100 p-3">
-              <p className="text-sm">{message.content}</p>
-              {message.file_url ? (
-                <a className="text-sm text-blue-700 underline" href={message.file_url} target="_blank" rel="noreferrer">
-                  Open file
-                </a>
-              ) : null}
-              <p className="mt-2 text-xs text-zinc-600">{new Date(message.created_at).toLocaleString()}</p>
-            </article>
-          ))}
-        </section>
-        <form onSubmit={sendText} className="flex gap-2 rounded-lg border border-zinc-200 bg-white p-3">
-          <input
-            className="flex-1 rounded border border-zinc-300 px-3 py-2"
-            placeholder="Type a message..."
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-          />
-          <label className="cursor-pointer rounded border border-zinc-300 px-3 py-2 text-sm">
-            {uploading ? "Uploading..." : "Attach"}
+    <AppShell title="Chat">
+      <div className="mx-auto flex h-[calc(100dvh-10rem)] max-w-4xl flex-col gap-3 md:h-[calc(100dvh-8rem)]">
+        <Card className="p-3">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold">Self Chat</p>
+              <p className="text-xs text-[var(--muted)]">Private conversation with yourself</p>
+            </div>
+            <Input
+              placeholder="Search in chat..."
+              className="max-w-56"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+          </div>
+        </Card>
+
+        <Card className="flex-1 space-y-2 overflow-y-auto bg-[var(--panel-2)] p-3 md:p-4">
+          {!filtered.length ? (
+            <p className="py-12 text-center text-sm text-[var(--muted)]">No messages yet. Start your first note-to-self.</p>
+          ) : null}
+          {filtered.map((message, index) => {
+            const isSelf = message.type === "text" ? index % 2 === 0 : true;
+            return (
+              <article key={message.id} className={`flex ${isSelf ? "justify-end" : "justify-start"}`}>
+                <div
+                  className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm shadow-[var(--shadow-sm)] md:max-w-[70%] ${
+                    isSelf ? "bg-[var(--bubble-self)]" : "bg-[var(--bubble-other)]"
+                  }`}
+                >
+                  <p>{message.content}</p>
+                  {message.file_url ? (
+                    <a className="mt-1 block text-xs text-blue-600 underline" href={message.file_url} target="_blank" rel="noreferrer">
+                      Open attachment
+                    </a>
+                  ) : null}
+                  <p className="mt-1 text-right text-[11px] text-[var(--muted)]">
+                    {new Date(message.created_at).toLocaleTimeString()}
+                  </p>
+                </div>
+              </article>
+            );
+          })}
+        </Card>
+
+        <form onSubmit={sendText} className="card safe-bottom sticky bottom-16 flex items-center gap-2 p-2 md:bottom-0">
+          <label className="cursor-pointer">
+            <span className="sr-only">Attach file</span>
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[var(--panel-2)]">📎</span>
             <input
               type="file"
               className="hidden"
@@ -110,11 +127,17 @@ export default function ChatPage() {
               }}
             />
           </label>
-          <button className="rounded bg-zinc-900 px-4 py-2 text-white" type="submit">
+          <Input
+            className="h-10 flex-1 rounded-full"
+            placeholder={uploading ? "Uploading file..." : "Type a message"}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          />
+          <Button type="submit" className="h-10 rounded-full px-4">
             Send
-          </button>
+          </Button>
         </form>
-      </main>
-    </div>
+      </div>
+    </AppShell>
   );
 }

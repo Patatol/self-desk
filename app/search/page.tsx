@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { AppNav } from "@/components/app-nav";
+import { AppShell } from "@/components/layout/app-shell";
+import { Button, Card, Input } from "@/components/ui/primitives";
 import type { Message, Note, StoredFile } from "@/lib/types";
 
 type SearchResult = {
@@ -23,47 +24,53 @@ export default function SearchPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50">
-      <AppNav />
-      <main className="mx-auto w-full max-w-5xl space-y-4 px-4 py-6">
-        <form className="flex gap-2" onSubmit={runSearch}>
-          <input
-            className="flex-1 rounded border border-zinc-300 bg-white px-3 py-2"
+    <AppShell title="Global Search">
+      <div className="space-y-3">
+        <form className="flex flex-col gap-2 sm:flex-row" onSubmit={runSearch}>
+          <Input
+            className="flex-1"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search messages, notes, files..."
           />
-          <button className="rounded bg-zinc-900 px-4 py-2 text-white" type="submit">
-            Search
-          </button>
+          <Button type="submit">Search</Button>
         </form>
-        <section className="grid gap-4 md:grid-cols-3">
-          <div className="rounded border border-zinc-200 bg-white p-3">
-            <h2 className="font-semibold">Messages</h2>
+        <section className="grid gap-3 lg:grid-cols-3">
+          <Card className="p-3">
+            <h2 className="text-sm font-semibold">Messages</h2>
             <div className="mt-2 space-y-2 text-sm">
               {result.messages.map((item) => (
-                <p key={item.id}>{item.content}</p>
+                <p key={item.id} className="line-clamp-2">
+                  {item.content}
+                </p>
               ))}
+              {!result.messages.length ? <p className="text-[var(--muted)]">No matches</p> : null}
             </div>
-          </div>
-          <div className="rounded border border-zinc-200 bg-white p-3">
-            <h2 className="font-semibold">Notes</h2>
+          </Card>
+          <Card className="p-3">
+            <h2 className="text-sm font-semibold">Notes</h2>
             <div className="mt-2 space-y-2 text-sm">
               {result.notes.map((item) => (
-                <p key={item.id}>{item.title}</p>
+                <p key={item.id} className="line-clamp-2">
+                  {item.title}
+                </p>
               ))}
+              {!result.notes.length ? <p className="text-[var(--muted)]">No matches</p> : null}
             </div>
-          </div>
-          <div className="rounded border border-zinc-200 bg-white p-3">
-            <h2 className="font-semibold">Files</h2>
+          </Card>
+          <Card className="p-3">
+            <h2 className="text-sm font-semibold">Files</h2>
             <div className="mt-2 space-y-2 text-sm">
               {result.files.map((item) => (
-                <p key={item.id}>{item.file_name}</p>
+                <p key={item.id} className="line-clamp-2">
+                  {item.file_name}
+                </p>
               ))}
+              {!result.files.length ? <p className="text-[var(--muted)]">No matches</p> : null}
             </div>
-          </div>
+          </Card>
         </section>
-      </main>
-    </div>
+      </div>
+    </AppShell>
   );
 }

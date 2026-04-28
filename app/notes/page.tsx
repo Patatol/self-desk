@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { AppNav } from "@/components/app-nav";
+import { AppShell } from "@/components/layout/app-shell";
+import { Button, Card, Input } from "@/components/ui/primitives";
 import type { Note } from "@/lib/types";
 
 export default function NotesPage() {
@@ -67,60 +68,57 @@ export default function NotesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50">
-      <AppNav />
-      <main className="mx-auto grid w-full max-w-6xl grid-cols-[320px_1fr] gap-4 px-4 py-6">
-        <aside className="space-y-3 rounded-lg border border-zinc-200 bg-white p-3">
+    <AppShell title="Notes">
+      <div className="grid gap-3 lg:grid-cols-[320px_1fr]">
+        <Card className="space-y-3 p-3">
           <div className="flex gap-2">
-            <input
-              className="flex-1 rounded border border-zinc-300 px-3 py-2"
+            <Input
+              className="flex-1"
               placeholder="Search notes..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
-            <button className="rounded bg-zinc-900 px-3 py-2 text-white" onClick={createNote}>
-              New
-            </button>
+            <Button onClick={createNote}>New</Button>
           </div>
-          <div className="space-y-2">
+          <div className="max-h-[60dvh] space-y-2 overflow-y-auto">
             {filtered.map((note) => (
-              <div key={note.id} className="rounded border border-zinc-200 p-2">
+              <div key={note.id} className="rounded-xl border border-[var(--border)] bg-[var(--panel-2)] p-2">
                 <button className="w-full text-left" onClick={() => setSelectedId(note.id)}>
-                  <p className="font-medium">{note.title}</p>
+                  <p className="truncate text-sm font-medium">{note.title}</p>
                 </button>
-                <button className="mt-1 text-xs text-red-600" onClick={() => void deleteNote(note.id)}>
+                <button className="mt-1 text-xs text-red-500" onClick={() => void deleteNote(note.id)}>
                   Delete
                 </button>
               </div>
             ))}
           </div>
-        </aside>
-        <section className="space-y-3 rounded-lg border border-zinc-200 bg-white p-4">
+        </Card>
+        <Card className="space-y-3 p-3 md:p-4">
           {selected ? (
             <>
-              <input
-                className="w-full rounded border border-zinc-300 px-3 py-2 text-lg font-semibold"
+              <Input
+                className="text-base font-semibold"
                 value={selected.title}
                 onChange={(e) =>
                   setNotes((prev) => prev.map((n) => (n.id === selected.id ? { ...n, title: e.target.value } : n)))
                 }
               />
               <textarea
-                className="h-[58vh] w-full rounded border border-zinc-300 px-3 py-2 font-mono text-sm"
+                className="focus-ring h-[56dvh] w-full rounded-xl border border-[var(--border)] bg-[var(--panel)] p-3 font-mono text-sm"
                 value={selected.content}
                 onChange={(e) =>
                   setNotes((prev) => prev.map((n) => (n.id === selected.id ? { ...n, content: e.target.value } : n)))
                 }
               />
-              <button className="rounded bg-zinc-900 px-4 py-2 text-white" onClick={saveNote}>
-                Save
-              </button>
+              <div className="flex justify-end">
+                <Button onClick={saveNote}>Save note</Button>
+              </div>
             </>
           ) : (
-            <p className="text-zinc-600">Create or select a note.</p>
+            <p className="text-sm text-[var(--muted)]">Create or select a note.</p>
           )}
-        </section>
-      </main>
-    </div>
+        </Card>
+      </div>
+    </AppShell>
   );
 }

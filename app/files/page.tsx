@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { AppNav } from "@/components/app-nav";
+import { AppShell } from "@/components/layout/app-shell";
+import { Card, Input } from "@/components/ui/primitives";
 import type { StoredFile } from "@/lib/types";
 
 export default function FilesPage() {
@@ -24,26 +25,25 @@ export default function FilesPage() {
   );
 
   return (
-    <div className="min-h-screen bg-zinc-50">
-      <AppNav />
-      <main className="mx-auto w-full max-w-4xl space-y-4 px-4 py-6">
-        <input
-          className="w-full rounded border border-zinc-300 bg-white px-3 py-2"
+    <AppShell title="Files">
+      <div className="space-y-3">
+        <Input
+          className="w-full md:max-w-sm"
           placeholder="Search files..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-        <section className="space-y-2 rounded-lg border border-zinc-200 bg-white p-4">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {filtered.map((file) => (
-            <article key={file.id} className="rounded border border-zinc-200 p-3">
-              <p className="font-medium">{file.file_name}</p>
-              <p className="text-xs text-zinc-600">{file.mime_type}</p>
-              <p className="text-xs text-zinc-600">{Math.round(file.size_bytes / 1024)} KB</p>
-            </article>
+            <Card key={file.id} className="space-y-2 p-3">
+              <p className="truncate font-medium">{file.file_name}</p>
+              <p className="text-xs text-[var(--muted)]">{file.mime_type}</p>
+              <p className="text-xs text-[var(--muted)]">{Math.max(1, Math.round(file.size_bytes / 1024))} KB</p>
+            </Card>
           ))}
-          {!filtered.length ? <p className="text-sm text-zinc-600">No files uploaded yet.</p> : null}
-        </section>
-      </main>
-    </div>
+        </div>
+        {!filtered.length ? <p className="text-sm text-[var(--muted)]">No files uploaded yet.</p> : null}
+      </div>
+    </AppShell>
   );
 }
