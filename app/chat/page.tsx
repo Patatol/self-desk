@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/layout/app-shell";
 import { Button, Card, Input } from "@/components/ui/primitives";
 import type { Message } from "@/lib/types";
+import { Paperclip, SendHorizontal } from "lucide-react";
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -95,7 +96,7 @@ export default function ChatPage() {
             return (
               <article key={message.id} className={`flex ${isSelf ? "justify-end" : "justify-start"}`}>
                 <div
-                  className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm shadow-[var(--shadow-sm)] md:max-w-[70%] ${
+                  className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm shadow-[var(--shadow-sm)] transition-all duration-200 md:max-w-[70%] ${
                     isSelf ? "bg-[var(--bubble-self)]" : "bg-[var(--bubble-other)]"
                   }`}
                 >
@@ -117,7 +118,9 @@ export default function ChatPage() {
         <form onSubmit={sendText} className="card safe-bottom sticky bottom-16 flex items-center gap-2 p-2 md:bottom-0">
           <label className="cursor-pointer">
             <span className="sr-only">Attach file</span>
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[var(--panel-2)]">📎</span>
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[var(--panel-2)] transition-transform duration-200 hover:scale-105">
+              <Paperclip size={16} />
+            </span>
             <input
               type="file"
               className="hidden"
@@ -134,7 +137,9 @@ export default function ChatPage() {
             onChange={(e) => setText(e.target.value)}
           />
           <Button type="submit" className="h-10 rounded-full px-4">
-            Send
+            <span className="flex items-center gap-1">
+              Send <SendHorizontal size={14} />
+            </span>
           </Button>
         </form>
       </div>

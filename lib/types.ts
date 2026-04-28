@@ -25,4 +25,5 @@ export type StoredFile = {
   mime_type: string;
   size_bytes: number;
   created_at: string;
+  file_url?: string | null;
 };

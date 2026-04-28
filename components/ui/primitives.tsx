@@ -16,7 +16,7 @@ export function Button({
   return (
     <button
       {...props}
-      className={`focus-ring rounded-xl px-3 py-2 text-sm font-medium transition ${variantClass[variant]} ${className}`}
+      className={`focus-ring rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 ${variantClass[variant]} ${className}`}
     />
   );
 }
@@ -25,11 +25,11 @@ export function Input({ className = "", ...props }: InputHTMLAttributes<HTMLInpu
   return (
     <input
       {...props}
-      className={`focus-ring rounded-xl border border-[var(--border)] bg-[var(--panel)] px-3 py-2 text-sm ${className}`}
+      className={`focus-ring rounded-xl border border-[var(--border)] bg-[var(--panel)] px-3 py-2 text-sm transition-colors duration-200 ${className}`}
     />
   );
 }
 
 export function Card({ className = "", children }: { className?: string; children: React.ReactNode }) {
-  return <section className={`card ${className}`}>{children}</section>;
+  return <section className={`card transition-all duration-200 ease-out hover:shadow-[var(--shadow-md)] ${className}`}>{children}</section>;
 }
