@@ -5,10 +5,32 @@ import { AppShell } from "@/components/layout/app-shell";
 import { Button, Card, Input } from "@/components/ui/primitives";
 import type { Note } from "@/lib/types";
 
+type NoteStatus = "idea" | "in_progress" | "done" | "archived";
+type NoteMeta = { status: NoteStatus; color: string };
+
+const statusOptions: { value: NoteStatus; label: string; color: string }[] = [
+  { value: "idea", label: "Idea", color: "text-blue-600" },
+  { value: "in_progress", label: "In Progress", color: "text-amber-600" },
+  { value: "done", label: "Done", color: "text-emerald-600" },
+  { value: "archived", label: "Archived", color: "text-zinc-500" },
+];
+
+const noteColors = ["#ffffff", "#e0f2fe", "#fef3c7", "#dcfce7", "#fce7f3", "#ede9fe"];
+
 export default function NotesPage() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [selectedId, setSelectedId] = useState<string>("");
   const [query, setQuery] = useState("");
+  const [meta, setMeta] = useState<Record<string, NoteMeta>>(() => {
+    if (typeof window === "undefined") return {};
+    const stored = localStorage.getItem("selfdesk-note-meta");
+    if (!stored) return {};
+    try {
+      return JSON.parse(stored) as Record<string, NoteMeta>;
+    } catch {
+      return {};
+    }
+  });
   const selected = notes.find((n) => n.id === selectedId) ?? null;
 
   async function loadNotes() {
@@ -29,6 +51,10 @@ export default function NotesPage() {
     };
     void run();
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem("selfdesk-note-meta", JSON.stringify(meta));
+  }, [meta]);
 
   const filtered = useMemo(
     () =>
@@ -65,6 +91,15 @@ export default function NotesPage() {
     const remaining = notes.filter((n) => n.id !== id);
     setNotes(remaining);
     setSelectedId(remaining[0]?.id ?? "");
+    setMeta((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  }
+
+  function getNoteMeta(id: string): NoteMeta {
+    return meta[id] ?? { status: "idea", color: "#ffffff" };
   }
 
   return (
@@ -82,10 +117,23 @@ export default function NotesPage() {
           </div>
           <div className="max-h-[60dvh] space-y-2 overflow-y-auto">
             {filtered.map((note) => (
-              <div key={note.id} className="rounded-xl border border-[var(--border)] bg-[var(--panel-2)] p-2">
+              <div
+                key={note.id}
+                className={`rounded-xl border p-2 transition-colors ${
+                  selectedId === note.id ? "border-[var(--accent-strong)] ring-1 ring-[var(--accent-strong)]" : "border-[var(--border)]"
+                }`}
+                style={{ backgroundColor: getNoteMeta(note.id).color }}
+              >
                 <button className="w-full text-left" onClick={() => setSelectedId(note.id)}>
                   <p className="truncate text-sm font-medium">{note.title}</p>
                 </button>
+                <p
+                  className={`mt-1 text-[11px] font-medium ${
+                    statusOptions.find((s) => s.value === getNoteMeta(note.id).status)?.color ?? "text-zinc-500"
+                  }`}
+                >
+                  {statusOptions.find((s) => s.value === getNoteMeta(note.id).status)?.label ?? "Idea"}
+                </p>
                 <button className="mt-1 text-xs text-red-500" onClick={() => void deleteNote(note.id)}>
                   Delete
                 </button>
@@ -103,6 +151,43 @@ export default function NotesPage() {
                   setNotes((prev) => prev.map((n) => (n.id === selected.id ? { ...n, title: e.target.value } : n)))
                 }
               />
+              <div className="flex flex-wrap items-center gap-2">
+                <select
+                  className="focus-ring rounded-xl border border-[var(--border)] bg-[var(--panel)] px-3 py-2 text-sm"
+                  value={getNoteMeta(selected.id).status}
+                  onChange={(e) =>
+                    setMeta((prev) => ({
+                      ...prev,
+                      [selected.id]: { ...getNoteMeta(selected.id), status: e.target.value as NoteStatus },
+                    }))
+                  }
+                >
+                  {statusOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <div className="flex items-center gap-1">
+                  {noteColors.map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      className={`h-6 w-6 rounded-full border ${
+                        getNoteMeta(selected.id).color === color ? "ring-2 ring-[var(--accent-strong)]" : ""
+                      }`}
+                      style={{ backgroundColor: color }}
+                      onClick={() =>
+                        setMeta((prev) => ({
+                          ...prev,
+                          [selected.id]: { ...getNoteMeta(selected.id), color },
+                        }))
+                      }
+                      aria-label={`Set note color ${color}`}
+                    />
+                  ))}
+                </div>
+              </div>
               <textarea
                 className="focus-ring h-[56dvh] w-full rounded-xl border border-[var(--border)] bg-[var(--panel)] p-3 font-mono text-sm"
                 value={selected.content}
